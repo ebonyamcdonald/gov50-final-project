@@ -115,7 +115,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["Data/W110_Jun22/ATP W110 methodology.pdf","Data/W110_Jun22/ATP W110 questionnaire.pdf","Data/W110_Jun22/ATP W110 readme.txt","Data/W110_Jun22/ATP W110 topline.pdf","Data/W110_Jun22/ATP W110.sav","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/header-attrs-2.17/header-attrs.js","index_files/header-attrs-2.24/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["Data/W110_Jun22/ATP W110 methodology.pdf","Data/W110_Jun22/ATP W110 questionnaire.pdf","Data/W110_Jun22/ATP W110 readme.txt","Data/W110_Jun22/ATP W110 topline.pdf","Data/W110_Jun22/ATP W110.sav","index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/figure-html5/unnamed-chunk-4-1.png","index_files/header-attrs-2.17/header-attrs.js","index_files/header-attrs-2.24/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1525,7 +1525,58 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span><span class='va'>data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://haven.tidyverse.org/reference/read_spss.html'>read_sav</a></span><span class='op'>(</span><span class='st'>"Data/W110_Jun22/ATP W110.sav"</span><span class='op'>)</span></span></code></pre>
 </div>
 </div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
 <p>I am interested in understanding how Black Americans evaluate the democratic party, and what drives their statistical continuous support. Specifically, I speculate that Black support for the democratic party may be more based in moral evaluations rather than policy evaluations when compared to white Americans. I believe this is because the democratic party is often understood as having earned Black support due to policies favoring racial justice. I speculate that because as racism is often understood as a moral issues as opposed to a policy issue, black democrats are more likely to associate the democratic party with strong moral standing when compared to white democrats. The Pew Research Center data set that I am working with contains survey questions that prompt respondents to evaluate each party in terms of their capability in handling certain political issues, as well as their moral standing. I hypothesize that the data will demonstrate that black and white democrats will evaluate the democratic party similarly in terms of their capability of managing different policy issues, but that black democrats may be more likely to give the democratic party higher morality rankings. In this case, my explanatory variable is the respondents racial identity (which is offered by the dataset), and my outcome variable is their responses to the types of questions described above. My hypothesis could be disproven if, on average, white respondents gave the democratic party morality ratings similar to or higher than black respondents.</p>
+<h2 id="section"></h2>
+<p>1 White
+2 Black or African-American
+3 Asian or Asian-American
+4 Mixed Race
+5 Or some other race
+99 Don’t know/Refused</p>
+<p>TRAITREPa Compared to other Americans, would you say Republicans are…
+1 A lot more moral
+2 Somewhat more moral
+3 About the same
+4 Somewhat more immoral
+5 A lot more immoral</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>data</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span></span>
+<span>  Race <span class='op'>=</span> <span class='fu'><a href='https://dplyr.tidyverse.org/reference/case_when.html'>case_when</a></span><span class='op'>(</span></span>
+<span>    <span class='va'>F_RACECMB</span> <span class='op'>==</span> <span class='fl'>1</span> <span class='op'>~</span> <span class='st'>"White"</span>,</span>
+<span>    <span class='va'>F_RACECMB</span> <span class='op'>==</span> <span class='fl'>2</span> <span class='op'>~</span> <span class='st'>"Black"</span>, </span>
+<span>    <span class='va'>F_RACECMB</span> <span class='op'>==</span> <span class='fl'>3</span> <span class='op'>~</span> <span class='st'>"Asian or Asian American"</span>,</span>
+<span>    <span class='va'>F_RACECMB</span> <span class='op'>==</span> <span class='fl'>4</span> <span class='op'>~</span> <span class='st'>"Mixed Race"</span>,</span>
+<span>    <span class='va'>F_RACECMB</span> <span class='op'>==</span> <span class='fl'>5</span> <span class='op'>~</span> <span class='st'>"Some other Race"</span><span class='op'>)</span></span>
+<span>  <span class='op'>)</span></span>
+<span></span>
+<span></span>
+<span><span class='va'>data</span> <span class='op'>&lt;-</span> <span class='va'>data</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/drop_na.html'>drop_na</a></span><span class='op'>(</span><span class='va'>Race</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>dem_moral_race</span> <span class='op'>&lt;-</span> <span class='va'>data</span><span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></span><span class='op'>(</span><span class='va'>Race</span><span class='op'>)</span><span class='op'>|&gt;</span></span>
+<span></span>
+<span></span>
+<span>  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/summarise.html'>summarize</a></span><span class='op'>(</span>mean_dem_moral <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>TRAITDEMa_W110</span><span class='op'>)</span><span class='op'>)</span></span>
+<span></span>
+<span><span class='va'>dem_moral_plot</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span><span class='va'>dem_moral_race</span>, <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>Race</span>, y <span class='op'>=</span> <span class='va'>mean_dem_moral</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_bar.html'>geom_col</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>+</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Respondent's Race"</span>, y <span class='op'>=</span> <span class='st'>"Morality Rating for Democratic Party"</span><span class='op'>)</span></span>
+<span>  </span>
+<span><span class='va'>dem_moral_plot</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
+</div>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

@@ -18,6 +18,57 @@ library(haven)
 data <- read_sav("Data/W110_Jun22/ATP W110.sav")
 ```
 
+```{r}
+library(tidyverse)
+```
 
 
 I am interested in understanding how Black Americans evaluate the democratic party, and what drives their statistical continuous support. Specifically, I speculate that Black support for the democratic party may be more based in moral evaluations rather than policy evaluations when compared to white Americans. I believe this is because the democratic party is often understood as having earned Black support due to policies favoring racial justice. I speculate that because as racism is often understood as a moral issues as opposed to a policy issue, black democrats are more likely to associate the democratic party with strong moral standing when compared to white democrats. The Pew Research Center data set that I am working with contains survey questions that prompt respondents to evaluate each party in terms of their capability in handling certain political issues, as well as their moral standing. I hypothesize that the data will demonstrate that black and white democrats will evaluate the democratic party similarly in terms of their capability of managing different policy issues, but that black democrats may be more likely to give the democratic party higher morality rankings. In this case, my explanatory variable is the respondents racial identity (which is offered by the dataset), and my outcome variable is their responses to the types of questions described above. My hypothesis could be disproven if, on average, white respondents gave the democratic party morality ratings similar to or higher than black respondents.
+
+
+##
+1 White
+2 Black or African-American
+3 Asian or Asian-American
+4 Mixed Race
+5 Or some other race
+99 Don’t know/Refused
+
+TRAITREPa Compared to other Americans, would you say Republicans are…
+1 A lot more moral
+2 Somewhat more moral
+3 About the same
+4 Somewhat more immoral
+5 A lot more immoral
+
+
+```{r}
+data <- data |>
+  mutate(
+  Race = case_when(
+    F_RACECMB == 1 ~ "White",
+    F_RACECMB == 2 ~ "Black", 
+    F_RACECMB == 3 ~ "Asian or Asian American",
+    F_RACECMB == 4 ~ "Mixed Race",
+    F_RACECMB == 5 ~ "Some other Race")
+  )
+
+
+data <- data |>
+  drop_na(Race)
+```
+
+```{r}
+dem_moral_race <- data|>
+  group_by(Race)|>
+
+
+  summarize(mean_dem_moral = mean(TRAITDEMa_W110))
+
+dem_moral_plot <- ggplot(dem_moral_race, aes(x = Race, y = mean_dem_moral)) +
+  geom_col() +
+  labs(x = "Respondent's Race", y = "Morality Rating for Democratic Party")
+  
+dem_moral_plot
+```
+
