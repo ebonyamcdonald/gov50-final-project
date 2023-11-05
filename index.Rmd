@@ -25,6 +25,7 @@ library(tidyverse)
 
 I am interested in understanding how Black Americans evaluate the democratic party, and what drives their statistical continuous support. Specifically, I speculate that Black support for the democratic party may be more based in moral evaluations rather than policy evaluations when compared to white Americans. I believe this is because the democratic party is often understood as having earned Black support due to policies favoring racial justice. I speculate that because as racism is often understood as a moral issues as opposed to a policy issue, black democrats are more likely to associate the democratic party with strong moral standing when compared to white democrats. The Pew Research Center data set that I am working with contains survey questions that prompt respondents to evaluate each party in terms of their capability in handling certain political issues, as well as their moral standing. I hypothesize that the data will demonstrate that black and white democrats will evaluate the democratic party similarly in terms of their capability of managing different policy issues, but that black democrats may be more likely to give the democratic party higher morality rankings. In this case, my explanatory variable is the respondents racial identity (which is offered by the dataset), and my outcome variable is their responses to the types of questions described above. My hypothesis could be disproven if, on average, white respondents gave the democratic party morality ratings similar to or higher than black respondents.
 
+https://press.princeton.edu/ideas/why-are-blacks-democrats
 
 ##
 1 White
@@ -71,4 +72,13 @@ dem_moral_plot <- ggplot(dem_moral_race, aes(x = Race, y = mean_dem_moral)) +
   
 dem_moral_plot
 ```
+
+ASK IF INDEP/SOMETHING ELSE (PARTY=3, 4 OR REFUSED):
+PARTYLN As of today do you lean more to…
+1 The Republican Party
+2 The Democratic Party
+
+
+possible expansion:
+are democrats more likely to condemn the overall personhood of republicans (morality, intelligence, honesty, etc) than vice versa?
 
