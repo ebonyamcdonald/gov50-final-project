@@ -182,7 +182,4 @@ mutate(morality_ate = black_dem_rep_moral_eval - white_dem_rep_moral_eval)
 knitr::kable(morality_ate, col.names = c("Average Treatment Effect of Race on Moral Evaluation of Party"))
 ```
 
-```{r}
-
-```
-
+In this milestone, I calculated the Average Treatment Effect of Race on one's moral evaluation of the republican and democratic party. I found that on average in this sample, black democrats evaluated republicans as being less moral (a 1.73 difference on a 5 point scale) in comparison to how white democrats evaluate the morality of the republican party. This demonstrates that a reason for black American's commitment to the democratic may not just be because of policy preferences, but because of long-standing perceptions around character and personhood.
