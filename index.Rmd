@@ -133,7 +133,7 @@ morality <- morality |>
 morality <- morality |>
   filter(TRAITDEMa_W110 < 99)
 
-morality |>
+morality <- morality |>
   group_by(Party)|>
   summarize(
     mean_moral_eval_rep = mean(TRAITREPa_W110),
@@ -179,6 +179,10 @@ morality|>
 mutate(morality_ate = black_dem_rep_moral_eval - white_dem_rep_moral_eval)
   
 
-morality_ate
+knitr::kable(morality_ate, col.names = c("Average Treatment Effect of Race on Moral Evaluation of Party"))
+```
+
+```{r}
+
 ```
 
