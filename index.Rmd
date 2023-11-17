@@ -20,6 +20,7 @@ data <- read_sav("Data/W110_Jun22/ATP W110.sav")
 
 ```{r}
 library(tidyverse)
+library(dplyr)
 ```
 
 
@@ -44,7 +45,7 @@ TRAITREPa Compared to other Americans, would you say Republicans are…
 
 
 ```{r}
-data <- data |>
+morality <- data |>
   mutate(
   Race = case_when(
     F_RACECMB == 1 ~ "White",
@@ -55,9 +56,48 @@ data <- data |>
   )
 
 
-data <- data |>
+morality <- morality |>
   drop_na(Race)
 ```
+
+
+```{r}
+morality <- morality |>
+  mutate(
+    Party = case_when(
+      F_PARTY_FINAL == 1 ~ "Republican",
+      F_PARTY_FINAL == 2 ~ "Democrat",
+      F_PARTY_FINAL == 3 ~ "Independent",
+      F_PARTY_FINAL == 4 ~ "Other"
+    )
+  )
+
+```
+
+```{r}
+data <- data |>
+  mutate(
+    moral_eval_rep = case_when(
+      TRAITREPa_W110 == 1 ~ "Very Moral",
+      TRAITREPa_W110 == 2 ~ "Somewhat Moral",
+      TRAITREPa_W110 == 3 ~ "Neutral",
+      TRAITREPa_W110 == 4 ~ "Somewhat Immoral",
+      TRAITREPa_W110 == 5 ~ "Very Immoral"
+    )
+  )
+```
+
+```{r}
+data <- data |>
+  mutate(
+    moral_eval_dem = case_when(
+      TRAITDEMa_W110 == 1 ~ "Very Moral",
+      TRAITDEMa_W110 == 2 ~ "Somewhat Moral",
+      TRAITDEMa_W110 == 3 ~ "Neutral",
+      TRAITDEMa_W110 == 4 ~ "Somewhat Immoral",
+      TRAITDEMa_W110 == 5 ~ "Very Immoral"))
+```
+
 
 ```{r}
 dem_moral_race <- data|>
@@ -81,4 +121,64 @@ PARTYLN As of today do you lean more to…
 
 possible expansion:
 are democrats more likely to condemn the overall personhood of republicans (morality, intelligence, honesty, etc) than vice versa?
+
+
+
+
+```{r}
+
+morality <- morality |>
+  filter(TRAITREPa_W110 < 99)
+
+morality <- morality |>
+  filter(TRAITDEMa_W110 < 99)
+
+morality |>
+  group_by(Party)|>
+  summarize(
+    mean_moral_eval_rep = mean(TRAITREPa_W110),
+    mean_moral_eval_dem = mean(TRAITDEMa_W110))
+            
+
+
+  
+```
+
+```{r}
+black_dem_rep_moral_eval <- morality|>
+  filter(F_PARTY_FINAL == 2 & F_RACECMB == 2)|>
+  summarize(black_dem_rep_moral_eval = mean(TRAITREPa_W110))
+  
+
+```
+
+```{r}
+black_dem_dem_moral_eval <- morality|>
+  filter(F_PARTY_FINAL == 2 & F_RACECMB == 2)|>
+  summarize(black_dem_dem_moral_eval = mean(TRAITDEMa_W110))
+```
+
+
+
+```{r}
+white_dem_rep_moral_eval <- morality |>
+   filter(F_PARTY_FINAL == 1 & F_RACECMB == 1)|>
+  summarize(white_dem_rep_moral_eval = mean(TRAITREPa_W110))
+```
+
+```{r}
+white_dem_dem_moral_eval <- morality |>
+   filter(F_PARTY_FINAL == 1 & F_RACECMB == 1)|>
+  summarize(white_dem_dem_moral_eval = mean(TRAITDEMa_W110))
+```
+
+
+
+```{r}
+morality|>
+mutate(morality_ate = black_dem_rep_moral_eval - white_dem_rep_moral_eval)
+  
+
+morality_ate
+```
 
