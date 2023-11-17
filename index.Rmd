@@ -98,15 +98,14 @@ data <- data |>
       TRAITDEMa_W110 == 5 ~ "Very Immoral"))
 ```
 
-
 ```{r}
-dem_moral_race <- data|>
+dem_moral_race <- morality|>
   group_by(Race)|>
 
 
-  summarize(mean_dem_moral = mean(TRAITDEMa_W110))
+summarize(mean_moral_eval_dem = mean(TRAITDEMa_W110))  
 
-dem_moral_plot <- ggplot(dem_moral_race, aes(x = Race, y = mean_dem_moral)) +
+dem_moral_plot <- ggplot(dem_moral_race, aes(x = Race, y = mean_moral_eval_dem)) +
   geom_col() +
   labs(x = "Respondent's Race", y = "Morality Rating for Democratic Party")
   
@@ -133,7 +132,7 @@ morality <- morality |>
 morality <- morality |>
   filter(TRAITDEMa_W110 < 99)
 
-morality <- morality |>
+morality |>
   group_by(Party)|>
   summarize(
     mean_moral_eval_rep = mean(TRAITREPa_W110),
@@ -149,7 +148,7 @@ black_dem_rep_moral_eval <- morality|>
   filter(F_PARTY_FINAL == 2 & F_RACECMB == 2)|>
   summarize(black_dem_rep_moral_eval = mean(TRAITREPa_W110))
   
-
+knitr::kable(black_dem_rep_moral_eval, col.names = "Black Democrats Moral Evaluation of Republican Party")
 ```
 
 ```{r}
@@ -164,10 +163,12 @@ black_dem_dem_moral_eval <- morality|>
 white_dem_rep_moral_eval <- morality |>
    filter(F_PARTY_FINAL == 1 & F_RACECMB == 1)|>
   summarize(white_dem_rep_moral_eval = mean(TRAITREPa_W110))
+
+knitr::kable(black_dem_rep_moral_eval, col.names = "White Democrats Moral Evaluation of Republican Party")
 ```
 
 ```{r}
-white_dem_dem_moral_eval <- morality |>
+morality |>
    filter(F_PARTY_FINAL == 1 & F_RACECMB == 1)|>
   summarize(white_dem_dem_moral_eval = mean(TRAITDEMa_W110))
 ```
@@ -175,11 +176,7 @@ white_dem_dem_moral_eval <- morality |>
 
 
 ```{r}
-morality|>
-mutate(morality_ate = black_dem_rep_moral_eval - white_dem_rep_moral_eval)
-  
 
-knitr::kable(morality_ate, col.names = c("Average Treatment Effect of Race on Moral Evaluation of Party"))
 ```
 
 In this milestone, I calculated the Average Treatment Effect of Race on one's moral evaluation of the republican and democratic party. I found that on average in this sample, black democrats evaluated republicans as being less moral (a 1.73 difference on a 5 point scale) in comparison to how white democrats evaluate the morality of the republican party. This demonstrates that a reason for black American's commitment to the democratic may not just be because of policy preferences, but because of long-standing perceptions around character and personhood.
