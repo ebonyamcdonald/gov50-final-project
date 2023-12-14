@@ -9,9 +9,6 @@ output:
 
 
 
-## Project thoughts
-
-I am interested in exploring data related to... voter turnout?
 
 ```{r}
 library(haven)
@@ -22,72 +19,28 @@ data <- read_sav("Data/W110_Jun22/ATP W110.sav")
 library(tidyverse)
 library(dplyr)
 library(infer)
+library(modelsummary)
+library(stargazer)
 ```
 
 
 
+##Introduction
 
-##
-1 White
-2 Black or African-American
-3 Asian or Asian-American
-4 Mixed Race
-5 Or some other race
-99 Don’t know/Refused
+This research project seeks to understand Black Americans consistent support for the Democratic Party. In the 2020 election, 87% of Black Americans voted democratic, and today, Black Americans have stronger support for the democratic party compared to any other groups' support for either republicans or democrats. I believe that this support may be in part from notions of the character of the parties rather than just policy evaluations, which may have stemmed from the democratic party's advocacy for civil rights during the Jim Crow era, and reputation for supporting pro-black causes in the present. Considering that considering that issues such as racism and racial justice are often understood as moral and identity issues rather than simply political, it may be the case that black democrats evaluate those in the republican party are lacking in morality in addition to other character traits. Because of this, I believe that Black democrats may have stronger negative judgements about the character of Republicans compared to White Democrats.
 
-TRAITREPa Compared to other Americans, would you say Republicans are…
-1 A lot more moral
-2 Somewhat more moral
-3 About the same
-4 Somewhat more immoral
-5 A lot more immoral
-
-TRAITREPb Compared to other Americans, would you say Republicans are…
-1 A lot more hard-working
-2 Somewhat more hard-working
-3 About the same
-4 Somewhat more lazy
-5 A lot more lazy
-
-
-TRAITREPc Compared to other Americans, would you say Republicans are…
-1 A lot more open-minded
-2 Somewhat more open-minded
-3 About the same
-4 Somewhat more closed-minded
-5 A lot more closed-minded
-
-TRAITREPe Compared to other Americans, would you say Republicans are…
-1 A lot more intelligent
-2 Somewhat more intelligent
-3 About the same
-4 Somewhat more UNintelligent
-5 A lot more UNintelligent
-
-TRAITREPf Compared to other Americans, would you say Republicans are…
-1 A lot more honest
-2 Somewhat more honest
-3 About the same
-4 Somewhat more DIShonest
-5 A lot more DIShonest
-
-
-
-
-```
-
-
+##Data
+To test this hypothesis, I used survey data from the Pew Research Center. I focused on the results of 5 questions which prompted respondents to evaluate both parties based on a variety of characteristics of(morality, hardworkingness, honesty, intelligence, and openmindedness) on a scale from 1 - 5, with 1 showing the "best" of that character trait. The survey also contained a question that asked respondents, whether or not they believed someone's political party said a lot or a little about whether or not they are a good or bad person (with 1 being yes party does indicate, and 2 being no party does not indicate). I hypothesize that black democrats' evaluations will, on average, will give republicans poorer scores across the 5 character traits, and will be more likely to believe that one's political party is indicative of whether they are a good or bad person. This data is cross-sectional, as data being studied was collected at one point in time, and is comparing responses between different groups of people rather than attempting to impose and measure the effect of a treatment overall.
 
 
 ```{r}
 polarity <- data |>
-  filter(F_PARTY_FINAL == 1 | F_PARTY_FINAL == 2)
+  filter(F_PARTY_FINAL == 2)
 
 polarity <- polarity |>
-  filter(TRAITREPa_W110 < 99)
+  filter(TRAITREPa_W110 < 99, TRAITREPb_W110 < 99, TRAITREPc_W110 < 99, TRAITREPe_W110 < 99, TRAITREPf_W110 < 99)
 
-polarity <- polarity |>
-  filter(TRAITDEMa_W110 < 99)
+
 
 polarity <- polarity |>
   mutate(
@@ -95,28 +48,297 @@ polarity <- polarity |>
       F_PARTY_FINAL == 1 ~ "Republican",
       F_PARTY_FINAL == 2 ~ "Democrat"))
 
-
-character_chart <- polarity |>
-  group_by(Party)|>
-  summarize(moral_eval_rep = mean(TRAITREPa_W110),
-            moral_eval_dem = mean(TRAITDEMa_W110),
-            hardwork_eval_rep = mean(TRAITREPb_W110),
-            hardwork_eval_dem = mean(TRAITDEMb_W110),
-            openmind_eval_rep = mean(TRAITREPc_W110),
-            openmind_eval_dem = mean(TRAITDEMc_W110),
-            smart_eval_rep = mean(TRAITREPe_W110),
-            smart_eval_dem = mean(TRAITDEMe_W110),
-            honest_eval_rep = mean(TRAITREPf_W110),
-            honest_eval_dem = mean(TRAITDEMf_W110))
+polarity <- polarity |>
+  mutate(
+    Race = case_when(
+      F_RACECMB == 1 ~ "White",
+      F_RACECMB == 2 ~ "Black"
+    )
+  )
+polarity <-polarity |>
+  drop_na(Race)
+```
 
 
 
-
+```{r}
+ates <- polarity |>
   
+  filter(F_PARTY_FINAL == 2)|>
+  
+  group_by(Race)|>
+  
+  summarize(moral_reps = mean(TRAITREPa_W110), hardwork_reps = mean(TRAITREPb_W110), openmind_reps = mean(TRAITREPc_W110), smart_reps = mean(TRAITREPe_W110), honest_reps = mean(TRAITREPf_W110)) |>
+  
+  pivot_wider(names_from = Race, values_from = c(moral_reps, hardwork_reps, openmind_reps, smart_reps, honest_reps)) |>
+  mutate(moral_ate = moral_reps_Black - moral_reps_White, hardwork_ate = hardwork_reps_Black - hardwork_reps_White, openmind_ate = openmind_reps_Black - openmind_reps_White, smart_ate = smart_reps_Black - smart_reps_White, honest_ate = honest_reps_Black - honest_reps_White) |>
+  select(moral_ate, hardwork_ate, openmind_ate, smart_ate, honest_ate)
 
+knitr::kable(ates, col.names = c("Morality ATE", "Hardwork ATE", "Openmindedness ATE", "Intellect ATE", "Honesty ATE"))
+
+```
+```{r}
+ind_ates <- polarity |>
+  filter(F_PARTY_FINAL == 2, PARTY_GOOD_W110 < 3) |>
+  group_by(Race) |>
+  summarize(ind_reps = mean(PARTY_GOOD_W110)) |>
+  pivot_wider(names_from = Race, values_from = ind_reps)|>
+              mutate(ind_ates = `Black` - `White`)
+
+knitr::kable(ind_ates, col.names = c("Black Democrats", "White Democrats", "ATE"))
+```
+
+
+
+Above, the difference in means between the White and Black democrats'character evaluations of the republican party are reported. The first ATE tells us that on average, Black democrats evaluate the republican party as being .01 less moral on a 5 point scale. This slightly more favorable perception of the character of republicans (compared to that of white democrats) is also observed in their perspective on the openmindedness and intelligence. In contrast, black democrats have a slightly less favorable perception of the hardworkingness and honesty of republicans, compared to white democrats. Black and white democrats' repsonses were most similar when evaluating the morality and honesty of republicans, and most different when evaluating the hardworkingness and openmindedness of republicans. Overall, the mean of these ATEs is -.02, indicating that overall, black democrats evaluated the character of republicans .02 points (on a 5 point scale) more favorably than white democrats
+
+The average treatment effect of race on whether or not respondents believed that one's party indicated whether they were a good or bad person was -.16 on a 2 point scale (with 1 indicating yes, and 2 indicating no). Using a percent difference calculator, we can conclude that on average, black democrats were 10.8% more likely to believe that Party impacted whether a person was good or bad. Overall, by analyzing the bargraphs and boxplots of the respondent date to the 6 questions, it is apparent that white and black democrats responses were largely similar in both average and quartiles.
+
+morality question percent difference: .25%
+hardwork question percent difference: 5.14%
+openenmindedness question percent difference: 4.64%
+intelligence question percent difference: 3.27%
+honesty question percent difference: 1.49%
+
+ind = 10.8%
+
+
+
+
+```{r}
+reps_as_moral <- polarity |>
+ filter(F_PARTY_FINAL == 2) |>
+   group_by(Race) |>
+  summarize(moral_reps = mean(TRAITREPa_W110)) ##TRAITREPa_W110 asks respondents to rate the moral character of republicans, with 1 being most moral and 5 being least moral
+ 
+  
+reps_as_moral_plot <- ggplot(reps_as_moral, aes(x = Race, y = moral_reps, fill = Race)) + geom_col(position = "dodge") +
+    scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+    labs(x = "Race of Democrat", y = "Belief that Republicans are Less Moral")
+ reps_as_moral_plot
+```
+
+```{r}
+moral_boxplot <- ggplot(data = polarity, mapping = aes(x = Race, y = TRAITREPa_W110)) + geom_boxplot() +
+  labs(x = "Race", y = "Moral Evaluation of Republican Party")
+
+moral_boxplot
+```
+
+
+
+
+```{r}
+reps_as_hardwork <- polarity |>
+ filter(TRAITREPb_W110 < 99, F_PARTY_FINAL == 2)|>
+  group_by(Race) |>
+summarize(hardwork_reps = mean(TRAITREPb_W110))
+
+
+reps_as_hardwork_plot <- ggplot(reps_as_hardwork, aes(x = Race, y = hardwork_reps, fill = Race)) + geom_col(position = "dodge") +
+     scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+    labs(x = "Race of Democrat", y = "Belief that Republicans are Less Hardworking")
+
+reps_as_hardwork_plot
+``` 
+
+
+
+```{r}
+hardwork_boxplot <- ggplot(data = polarity, mapping = aes(x = Race, y = TRAITREPb_W110)) + geom_boxplot() +
+  labs(x = "Race", y = "Evaluation of Republican Party's Hardworkingness")
+
+hardwork_boxplot
 ```
 
 
 
 
 
+
+```{r}
+reps_as_openmind <- polarity |>
+ filter(TRAITREPc_W110 < 99, F_PARTY_FINAL == 2)|>
+  group_by(Race) |>
+summarize(openmind_reps = mean(TRAITREPc_W110))
+
+reps_as_openmind ##lower is better
+
+reps_as_openmind_plot <- ggplot(reps_as_openmind, aes(x = Race, y = openmind_reps, fill = Race)) + geom_col(position = "dodge") +
+     scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+    labs(x = "Race of Democrat", y = "Belief that Republicans are Less Openminded")
+
+reps_as_openmind_plot
+```
+
+```{r}
+openmind_boxplot <- ggplot(data = polarity, mapping = aes(x = Race, y = TRAITREPc_W110)) + geom_boxplot() +
+  labs(x = "Race", y = "Evaluation of Republican Party's Openmindedness")
+
+openmind_boxplot
+```
+
+
+
+
+```{r}
+reps_as_smart <- polarity|>
+  filter(TRAITREPe_W110 < 99, F_PARTY_FINAL == 2) |>
+  group_by(Race) |>
+  summarize(smart_reps = mean(TRAITREPe_W110))
+
+reps_as_smart ##lower is better
+
+reps_as_smart_plot <- ggplot(reps_as_smart, aes(x = Race, y = smart_reps, fill = Race)) + geom_col(position = "dodge") +
+     scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+    labs(x = "Race of Democrat", y = "Belief that Republicans are Less Intelligent")
+
+reps_as_smart_plot
+```
+
+
+```{r}
+smart_boxplot <- ggplot(data = polarity, mapping = aes(x = Race, y = TRAITREPe_W110)) + geom_boxplot() +
+  labs(x = "Race", y = "Evaluation of Republican Party's Intelligence")
+
+smart_boxplot
+```
+
+
+
+
+```{r}
+reps_as_honest <- polarity |>
+  filter(TRAITREPf_W110 < 99, F_PARTY_FINAL == 2) |>
+  group_by(Race) |>
+  summarize(honest_reps = mean(TRAITREPf_W110))
+
+reps_as_honest
+
+reps_as_honest_plot <- ggplot(reps_as_honest, aes(x = Race, y = honest_reps, fill = Race)) + geom_col(position = "dodge") +
+     scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+  
+    labs(x = "Race of Democrat", y = "Belief that Republicans are Less Honest")
+
+reps_as_honest_plot
+```
+
+
+```{r}
+honest_boxplot <- ggplot(data = polarity, mapping = aes(x = Race, y = TRAITREPf_W110)) + geom_boxplot() +
+  labs(x = "Race", y = "Evaluation of Republican Party's Honesty")
+
+honest_boxplot
+```
+
+
+
+```{r}
+party_as_ind_chart <- polarity |>
+  filter(PARTY_GOOD_W110 < 3, F_PARTY_FINAL == 2) |>
+  group_by(Race) |>
+  summarize(party_as_ind = mean(PARTY_GOOD_W110))
+
+party_as_ind_chart
+
+
+party_as_ind_plot <- ggplot(party_as_ind_chart, aes(x = Race, y = party_as_ind, fill = Race)) + 
+  geom_col() + 
+  
+  
+  scale_fill_manual(values = c(Black = "orange", White ="blue")) +
+    labs(x = "Race of Democrat", y = "Belief that One's Party is Irrelevant to Whether They're Good or Bad")
+
+party_as_ind_plot
+```
+
+
+
+##Results Section
+
+For this project, I ran a regression for the respondents' responses to each of the 6 question in order to assess the impact of Race (among democrats) on their evaluation of republican character. When controlling for income, black democrats evaluations of republicans' morality are .14 points (on a 5 point scale) lower than those of white democrats, indicating better evaluations of morality. Their evaluations of republicans' openmindedness and intelligence are similarly more favorable than those of white democrats, at .20 and .11 points lower respectively. In contrast, when controlling for income, black democrats evaluate the honesty and hardworkingness of republicans less favorably, at .05 and .16 points higher, respectively. When analyzing the responses to the question regarding party as an indicator of being a good or bad person (and controlling for family income), we can see that black democrats are .21 points (on a 2 point scale) more likely to believe that party is indicative.
+By using the p-values of each regression, we can determine which results are statistically significant when alpha is .05. In this case, the only evaluation analysis for which we can reject the null hypothesis that race does not impact one's evaluation is for the questions surrounding perceptions of the republican party's honesty, intelligence, and hardworkingness. Because we cannot reject the null hypothesis for the majority of the character evaluations, we should not interept these reults causally, especially considering that we cannot examine the counterfactual - meaning that we do not know how respondents would have evaluated the various traits had they been the opposite race.
+
+Regressions
+
+```{r}
+reg_moral <- lm(TRAITREPa_W110 ~ factor(Race) + F_INC_SDT1, data = polarity)
+
+reg_coef_moral <- coef(reg_moral)["Race"]
+
+
+
+
+modelsummary::modelsummary(reg_moral,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
+```{r}
+reg_hardwork <- lm(TRAITREPb_W110 ~ factor(Race) + F_INC_SDT1, data = polarity)
+
+reg_coef_hardwork <- coef(reg_hardwork)["Race"]
+
+
+modelsummary::modelsummary(reg_hardwork,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
+```{r}
+reg_openmind <- lm(TRAITREPc_W110 ~ factor(Race) + F_INC_SDT1, data = polarity)
+
+reg_coef_openmind <- coef(reg_openmind)["Race"]
+
+
+modelsummary::modelsummary(reg_openmind,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+```{r}
+reg_smart <- lm(TRAITREPe_W110 ~ factor(Race) + F_INC_SDT1, data = polarity)
+
+reg_coef_smart <- coef(reg_smart)["Race"]
+
+
+modelsummary::modelsummary(reg_smart,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+```{r}
+reg_honest <- lm(TRAITREPf_W110 ~ factor(Race) + F_INC_SDT1, data = polarity)
+
+reg_coef_honest <- coef(reg_honest)["Race"]
+
+
+modelsummary::modelsummary(reg_honest,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+```{r}
+reg_ind <- lm(PARTY_GOOD_W110 ~ factor(Race) + F_INC_SDT1, data = polarity) ##PARTY_GOOD_W110 on dataset represents belief that party is irrelevant to being good or bad
+
+reg_coef_ind <- coef(reg_ind)["Race"]
+
+
+modelsummary::modelsummary(reg_ind,
+statistic = c("s.e. = {std.error}",
+"p = {p.value}"),
+gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
+
+
+##Conclusion
+My results mostly do not support my hypothesis. This is because based on the data, black democrats were actually more likely to have favorable opinions toward the character of those in the republican party. Further, these perceptions were largely similar, and no questions bore significant differences in average ratings. Considering that the majority of the questions did not yield statistically significant results, there is likely little real-world relationship between race and character evaluations of the republican party. This analysis could be improved upon with a greater sample size, especially considering that many responses gathered from the survey were eliminated in this project as to simplify findings (ex. those who answered "Don't know" or "no opinion"). Further, controlling for more variables may be helpful, as there are several factors that may impact one's perception of the republican party (including unquanitiable experiences that cannot be recorded by a survey).
